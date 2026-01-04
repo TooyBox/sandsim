@@ -8,8 +8,13 @@
 Node *nodePool = {0};
 bool *nodeUsed = {0};
 
+//If called more than one time
 bool initPool = false;
 
+/**
+Initalizes a given list
+@ Param l: List to initialize
+**/
 void listInit(List* l) {
   l->start = NULL;
   l->end = NULL;
@@ -29,7 +34,9 @@ void listInit(List* l) {
   }
 }
 
-
+/**
+Used to free a list, but currently just frees the node pool and nodeUsed
+**/
 void freeList(List *l) {
   if (initPool) {
     free(nodePool);
@@ -37,7 +44,10 @@ void freeList(List *l) {
   }
 }
 
-
+/**
+Used to grab some free node from the nodePool
+@Return: Returns address of node from nodePool to use
+**/
 Node* allocNode(List *l) {
   size_t i = l->count;
   while (true) {
@@ -58,6 +68,10 @@ Node* allocNode(List *l) {
 }
 
 
+/**
+Frees node n, frees up item in nodePool
+@Param n: node to remove
+**/
 void freeNode(Node* n) {
   int index = n - nodePool;
   nodeUsed[index] = false;
@@ -67,6 +81,11 @@ void freeNode(Node* n) {
 }
 
 
+/**
+Appends item d to list l
+@Param l: List to add to
+@Param d: item to add to list
+**/
 void listAppend(List* l, Cell d) {
   Node* node = allocNode(l);
   if (node == NULL) {
@@ -92,7 +111,12 @@ void listAppend(List* l, Cell d) {
   }
 }
 
-
+/**
+Adds item from from of list to back
+Adds them in order of largest y -> smallest (also from largest x -> smallest)
+@Param l: list to add to
+@Param d: Cell to add to list
+**/
 void listPrependOrder(List* l, Cell d) {
   Node* node = allocNode(l);
   if (node == NULL) {
@@ -140,6 +164,11 @@ void listPrependOrder(List* l, Cell d) {
 }
 
 
+/**
+Removes item n from list l
+@Param l: list to remove from
+@Param n: node to remove from list
+**/
 void listRemove(List *l, Node* n) {
   for (Node* current = l->start; current != NULL; current = current->next) {
     if (current == n) {
@@ -166,7 +195,12 @@ void listRemove(List *l, Node* n) {
   }
 }
 
-
+/**
+Returns node that contains item c
+@Param l: list to search
+@Param c: item to find
+@Return: Node that contains item c
+**/
 Node* listGet(List* l, Cell c) {
   for (Node* current = l->start; current != NULL; current = current->next) {
     if (isStructEqual(current->data, c)) {

@@ -2,6 +2,11 @@
 #include <cell.h>
 #include <list.h>
 
+/**
+Used to run programs control
+@ Param: window -> current window context of program
+@ Return: success/failure
+**/
 int start(SDL_Window* window) {
   bool running = true;
 

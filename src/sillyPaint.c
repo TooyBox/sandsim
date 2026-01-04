@@ -1,6 +1,7 @@
 #include <main.h>
 #include <controller.h>
 
+//Entrance for program
 int main() {
   SDL_Init(SDL_INIT_VIDEO);
 

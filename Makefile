@@ -1,4 +1,5 @@
 ## Makefile for sillyPaint
+## Very simple
 
 CC=gcc
 CFLAGS=-std=c99 -Wall -Wextra -pedantic
@@ -38,9 +39,6 @@ $(BUILD) $(OBJ):
 
 $(OBJ)/%.o : $(SRC)/%.c | $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@ $(INC)
-
-#$(OBJECTS) : $(SOURCE) | $(OBJ)
-#	$(CC) -c $(CFLAGS) $(SOURCE) -o $(OBJECTS) $(INC)
 
 sillyPaint : $(OBJECTS) | $(OBJ)
 	$(CC) $(CPPFLAGS) $(OBJECTS) $(LIB) $(LDFLAGS) -lSDL3 -o sillyPaint
