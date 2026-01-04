@@ -34,6 +34,17 @@ void listInit(List* l) {
   }
 }
 
+
+void listClear(List *l) {
+  memset(nodePool, 0, sizeof(Node) * MAXPARTICLES);
+  memset(nodeUsed, 0, sizeof(bool) * MAXPARTICLES);
+
+  l->start = NULL;
+  l->end = NULL;
+  l->count = 0;
+}
+
+
 /**
 Used to free a list, but currently just frees the node pool and nodeUsed
 **/

@@ -11,6 +11,8 @@ typedef struct Cell {
 
 int init(SDL_Window*);
 
+void clear();
+
 void test();
 
 int addSand(Point);

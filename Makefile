@@ -13,11 +13,13 @@ OBJ=build/obj
 SOURCE=$(SRC)/controller.c \
 	$(SRC)/linkedList.c \
 	$(SRC)/cell.c \
+	$(SRC)/randomSand.c \
 	$(SRC)/sillyPaint.c 
 
 OBJECTS=$(OBJ)/controller.o \
 	$(OBJ)/linkedList.o \
 	$(OBJ)/cell.o \
+	$(OBJ)/randomSand.o \
 	$(OBJ)/sillyPaint.o
 
 SRC=src

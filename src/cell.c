@@ -14,31 +14,19 @@ bool tempOcc[sp_width][sp_height] = {0};
 #define gravity 1.0
 
 
-#define numDirections 132
+#define numDirections 30
 /* All directions to check, easy to change if wanted :D */
 Point directions[numDirections] = {
-     {5.0, 5.0}, {5.0, 4.0}, {5.0, 3.0}, {5.0, 2.0}, {5.0, 1.0}, 
-     {5.0, 0.0}, {5.0, -1.0}, {5.0, -2.0}, {5.0, -3.0}, {5.0, -4.0}, {5.0, -5.0}, 
-     {4.0, 5.0}, {4.0, 4.0}, {4.0, 3.0}, {4.0, 2.0}, {4.0, 1.0}, 
-     {4.0, 0.0}, {4.0, -1.0}, {4.0, -2.0}, {4.0, -3.0}, {4.0, -4.0}, {4.0, -5.0}, 
-     {3.0, 5.0}, {3.0, 4.0}, {3.0, 3.0}, {3.0, 2.0}, {3.0, 1.0}, 
-     {3.0, 0.0}, {3.0, -1.0}, {3.0, -2.0}, {3.0, -3.0}, {3.0, -4.0}, {3.0, -5.0}, 
-     {2.0, 5.0}, {2.0, 4.0}, {2.0, 3.0}, {2.0, 2.0}, {2.0, 1.0}, 
-     {2.0, 0.0}, {2.0, -1.0}, {2.0, -2.0}, {2.0, -3.0}, {2.0, -4.0}, {2.0, -5.0}, 
-     {1.0, 5.0}, {1.0, 4.0}, {1.0, 3.0}, {1.0, 2.0}, {1.0, 1.0}, 
-     {1.0, 0.0}, {1.0, -1.0}, {1.0, -2.0}, {1.0, -3.0}, {1.0, -4.0}, {1.0, -5.0}, 
-     {0.0, 5.0}, {0.0, 4.0}, {0.0, 3.0}, {0.0, 2.0}, {0.0, 1.0}, 
-     {0.0, 0.0}, {0.0, -1.0}, {0.0, -2.0}, {0.0, -3.0}, {0.0, -4.0}, {0.0, -5.0}, 
-     {-1.0, 5.0}, {-1.0, 4.0}, {-1.0, 3.0}, {-1.0, 2.0}, {-1.0, 1.0}, 
-     {-1.0, 0.0}, {-1.0, -1.0}, {-1.0, -2.0}, {-1.0, -3.0}, {-1.0, -4.0}, {-1.0, -5.0}, 
-     {-2.0, 5.0}, {-2.0, 4.0}, {-2.0, 3.0}, {-2.0, 2.0}, {-2.0, 1.0}, 
-     {-2.0, 0.0}, {-2.0, -1.0}, {-2.0, -2.0}, {-2.0, -3.0}, {-2.0, -4.0}, {-2.0, -5.0}, 
-     {-3.0, 5.0}, {-3.0, 4.0}, {-3.0, 3.0}, {-3.0, 2.0}, {-3.0, 1.0}, 
-     {-3.0, 0.0}, {-3.0, -1.0}, {-3.0, -2.0}, {-3.0, -3.0}, {-3.0, -4.0}, {-3.0, -5.0}, 
-     {-4.0, 5.0}, {-4.0, 4.0}, {-4.0, 3.0}, {-4.0, 2.0}, {-4.0, 1.0}, 
-     {-4.0, 0.0}, {-4.0, -1.0}, {-4.0, -2.0}, {-4.0, -3.0}, {-4.0, -4.0}, {-4.0, -5.0}, 
-     {-5.0, 5.0}, {-5.0, 4.0}, {-5.0, 3.0}, {-5.0, 2.0}, {-5.0, 1.0}, 
-     {-5.0, 0.0}, {-5.0, -1.0}, {-5.0, -2.0}, {-5.0, -3.0}, {-5.0, -4.0}, {-5.0, -5.0}
+    {2, 2}, {2, 1}, 
+    {2, 0}, {2, -1}, {2, -2}, 
+    {1, 2}, {1, 1}, 
+    {1, 0}, {1, -1}, {1, -2}, 
+    {0, 2}, {0, 1}, 
+    {0, 0}, {0, -1}, {0, -2}, 
+    {-1, 2}, {-1, 1}, 
+    {-1, 0}, {-1, -1}, {-1, -2}, 
+    {-2, 2}, {-2, 1}, 
+    {-2, 0}, {-2, -1}, {-2, -2}
 };
 
 
@@ -46,13 +34,38 @@ Point directions[numDirections] = {
    [ ] [S] [ ]
    [P] [P] [P]
 */
-Point check[3] = {{0, gravity}, {gravity, gravity}, {gravity*-1, gravity}};
+#define NUMCHECKS 3
+Point check[NUMCHECKS] = {{0, gravity}, {gravity, gravity}, {gravity*-1, gravity}};
+
 
 SDL_Window* window;
 
 Uint8 colors[3] = {255, 125, 125};
 int pos = 1; // index of colors
 int sign = 1; // if we are adding or removing [125..255]
+
+/**
+Clears current state + screen
+**/
+void clear() {
+  SDL_Surface* surface = SDL_GetWindowSurface(window); 
+
+  colors[0] = 255;
+  colors[1] = 125;
+  colors[2] = 125;
+  pos = 1;
+  sign = 1;
+
+  memset(occupied, 0, sizeof(occupied));
+  memset(tempOcc, 0, sizeof(tempOcc));
+
+  SDL_FillSurfaceRect(surface, NULL, 0x0);
+
+  listClear(&activeCells);
+
+  SDL_DestroySurface(surface);
+}
+
 
 /**
 Initalizes the current cell context
@@ -179,12 +192,13 @@ void calculatePhysics() {
 
       bool canMove = false;
 
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < NUMCHECKS; i++) {
         double w = cx + check[i].x;
         double h = cy + check[i].y;
         if (w >= sp_width || w < 0 || h >= sp_height || h < 0) {
           continue;
         }
+        
         if (tempOcc[(int)w][(int)h]) { //If occupied, we cant move there, but we could next cycle
             // probably causes particles to fall in odd ways down slopes
             canMove = true;

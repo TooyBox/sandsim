@@ -21,6 +21,8 @@ void listInit();
 
 void freeList(List*);
 
+void listClear(List*);
+
 void listAppend(List*, Cell);
 
 void listPrependOrder(List*, Cell);
