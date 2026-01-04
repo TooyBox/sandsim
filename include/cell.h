@@ -6,17 +6,18 @@
 typedef struct Cell {
   Uint32 Color;
   Point location;
+  Point oldLocation;
 } Cell;
 
 int init(SDL_Window*);
+
+void test();
 
 int addSand(Point);
 
 void freeAllCells();
 
 void calculatePhysics();
-
-void drawInactiveSand();
 
 void drawSand();
 

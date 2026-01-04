@@ -5,15 +5,12 @@
 int start(SDL_Window* window) {
   bool running = true;
 
-  SDL_Surface* surface = SDL_GetWindowSurface(window);
- 
   init(window);
 
   SDL_Event event;
   
   bool pressed = false;
   while(running) {
-    SDL_FillSurfaceRect(surface, NULL, 0x0);
     while (SDL_PollEvent(&event)) {
       Point p = (Point) {event.motion.x, event.motion.y};      
       switch(event.type) {
@@ -38,12 +35,17 @@ int start(SDL_Window* window) {
           pressed = false;
           break;
 
+        case SDL_EVENT_KEY_DOWN:
+          if (event.key.key == SDLK_E) {
+            test();
+          }
+          break;
+
         default:
           break;
 
       }
     }
-    drawInactiveSand();
     calculatePhysics();
     drawSand();
     SDL_UpdateWindowSurface(window);

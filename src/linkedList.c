@@ -1,9 +1,7 @@
 #include <cell.h>
 #include <list.h>
 
-#define isStructEqual(one, two) (one.Color == two.Color && \
-     one.location.x == two.location.x && \
-     one.location.y == two.location.y)
+#define isStructEqual(one, two) (one.Color == two.Color && one.location.x == two.location.x && one.location.y == two.location.y && one.oldLocation.x == two.oldLocation.x && one.oldLocation.y == two.oldLocation.y)
 
 // very shit list :D
 
@@ -49,6 +47,7 @@ Node* allocNode(List *l) {
     
     if (!nodeUsed[i]) {
       nodeUsed[i] = true;
+      memset(&nodePool[i], 0, sizeof(Node));
       nodePool[i].next = NULL;
       nodePool[i].previous = NULL;
       return &nodePool[i];
@@ -62,6 +61,7 @@ Node* allocNode(List *l) {
 void freeNode(Node* n) {
   int index = n - nodePool;
   nodeUsed[index] = false;
+  memset(n, 0, sizeof(Node));
   n->next = NULL;
   n->previous = NULL;
 }
@@ -74,6 +74,7 @@ void listAppend(List* l, Cell d) {
     exit(EXIT_FAILURE);
   }
  
+  memset(node, 0, sizeof(Node));
   node->next = NULL;
   node->previous = NULL;
   node->data = d;
@@ -99,6 +100,7 @@ void listPrependOrder(List* l, Cell d) {
     exit(EXIT_FAILURE);
   }
 
+  memset(node, 0, sizeof(Node));
   node->data = d;
   node->next = NULL;
   node->previous = NULL;
@@ -141,36 +143,25 @@ void listPrependOrder(List* l, Cell d) {
 void listRemove(List *l, Node* n) {
   for (Node* current = l->start; current != NULL; current = current->next) {
     if (current == n) {
-      if(l->start == l->end && l->start == n) {
-        freeNode(n);
-        l->start = NULL;
-        l->end = NULL;
-        l->count = 0;
-        break;
+      if (l->start == l->end && l->start == n) {
+        l->start = l->end = NULL;
       }
-      else if (current == l->start) {
-        Node *s = l->start->next;
-        s->previous = NULL;
-        freeNode(l->start);
-        l->start = s;
-        l->count--;
-        break;
+      else if (n == l->start) {
+        l->start = n->next;
+        if (l->start) l->start->previous = NULL;
       }
-      else if (current == l->end) {
-         Node* p = l->end->previous; 
-        p->next = NULL;
-        freeNode(l->end);
-        l->end = p;
-        l->count--;
-        break;
-     }
+      else if (n == l->end) {
+        l->end = n->previous;
+        if (l->end) l->end->next = NULL;
+      }
       else {
-        current->previous->next = current->next;
-        current->next->previous = current->previous;
-        freeNode(current);
-        l->count--;  
-        break;
+        if (n->previous) n->previous->next = n->next;
+        if (n->next) n->next->previous = n->previous;
       }
+
+      freeNode(n);  // return to pool
+      l->count--;
+      break;
     }
   }
 }

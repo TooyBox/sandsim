@@ -2,7 +2,6 @@
 #include <cell.h>
 #include <list.h>
 
-List cells;
 List activeCells;
 
 bool occupied[sp_width][sp_height] = {0};
@@ -10,18 +9,32 @@ bool tempOcc[sp_width][sp_height] = {0};
 
 
 #define gravity 1.0
+#define numDirections 132
 
-Point directions[30] = {
-     {2.0, 2.0}, {2.0, 1.0}, 
-     {2.0, 0.0}, {2.0, -1.0}, {2.0, -2.0}, 
-     {1.0, 2.0}, {1.0, 1.0}, 
-     {1.0, 0.0}, {1.0, -1.0}, {1.0, -2.0}, 
-     {0.0, 2.0}, {0.0, 1.0}, 
-     {0.0, 0.0}, {0.0, -1.0}, {0.0, -2.0}, 
-     {-1.0, 2.0}, {-1.0, 1.0}, 
-     {-1.0, 0.0}, {-1.0, -1.0}, {-1.0, -2.0}, 
-     {-2.0, 2.0}, {-2.0, 1.0}, 
-     {-2.0, 0.0}, {-2.0, -1.0}, {-2.0, -2.0}
+
+Point directions[numDirections] = {
+     {5.0, 5.0}, {5.0, 4.0}, {5.0, 3.0}, {5.0, 2.0}, {5.0, 1.0}, 
+     {5.0, 0.0}, {5.0, -1.0}, {5.0, -2.0}, {5.0, -3.0}, {5.0, -4.0}, {5.0, -5.0}, 
+     {4.0, 5.0}, {4.0, 4.0}, {4.0, 3.0}, {4.0, 2.0}, {4.0, 1.0}, 
+     {4.0, 0.0}, {4.0, -1.0}, {4.0, -2.0}, {4.0, -3.0}, {4.0, -4.0}, {4.0, -5.0}, 
+     {3.0, 5.0}, {3.0, 4.0}, {3.0, 3.0}, {3.0, 2.0}, {3.0, 1.0}, 
+     {3.0, 0.0}, {3.0, -1.0}, {3.0, -2.0}, {3.0, -3.0}, {3.0, -4.0}, {3.0, -5.0}, 
+     {2.0, 5.0}, {2.0, 4.0}, {2.0, 3.0}, {2.0, 2.0}, {2.0, 1.0}, 
+     {2.0, 0.0}, {2.0, -1.0}, {2.0, -2.0}, {2.0, -3.0}, {2.0, -4.0}, {2.0, -5.0}, 
+     {1.0, 5.0}, {1.0, 4.0}, {1.0, 3.0}, {1.0, 2.0}, {1.0, 1.0}, 
+     {1.0, 0.0}, {1.0, -1.0}, {1.0, -2.0}, {1.0, -3.0}, {1.0, -4.0}, {1.0, -5.0}, 
+     {0.0, 5.0}, {0.0, 4.0}, {0.0, 3.0}, {0.0, 2.0}, {0.0, 1.0}, 
+     {0.0, 0.0}, {0.0, -1.0}, {0.0, -2.0}, {0.0, -3.0}, {0.0, -4.0}, {0.0, -5.0}, 
+     {-1.0, 5.0}, {-1.0, 4.0}, {-1.0, 3.0}, {-1.0, 2.0}, {-1.0, 1.0}, 
+     {-1.0, 0.0}, {-1.0, -1.0}, {-1.0, -2.0}, {-1.0, -3.0}, {-1.0, -4.0}, {-1.0, -5.0}, 
+     {-2.0, 5.0}, {-2.0, 4.0}, {-2.0, 3.0}, {-2.0, 2.0}, {-2.0, 1.0}, 
+     {-2.0, 0.0}, {-2.0, -1.0}, {-2.0, -2.0}, {-2.0, -3.0}, {-2.0, -4.0}, {-2.0, -5.0}, 
+     {-3.0, 5.0}, {-3.0, 4.0}, {-3.0, 3.0}, {-3.0, 2.0}, {-3.0, 1.0}, 
+     {-3.0, 0.0}, {-3.0, -1.0}, {-3.0, -2.0}, {-3.0, -3.0}, {-3.0, -4.0}, {-3.0, -5.0}, 
+     {-4.0, 5.0}, {-4.0, 4.0}, {-4.0, 3.0}, {-4.0, 2.0}, {-4.0, 1.0}, 
+     {-4.0, 0.0}, {-4.0, -1.0}, {-4.0, -2.0}, {-4.0, -3.0}, {-4.0, -4.0}, {-4.0, -5.0}, 
+     {-5.0, 5.0}, {-5.0, 4.0}, {-5.0, 3.0}, {-5.0, 2.0}, {-5.0, 1.0}, 
+     {-5.0, 0.0}, {-5.0, -1.0}, {-5.0, -2.0}, {-5.0, -3.0}, {-5.0, -4.0}, {-5.0, -5.0}
 };
 
 
@@ -41,14 +54,17 @@ int sign = 1;
 int init(SDL_Window* w) {
   window = w;
   listInit(&activeCells);
-  listInit(&cells);
   return EXIT_SUCCESS;
 }
 
 
 void freeAllCells() {
-  freeList(&cells);
   freeList(&activeCells);
+}
+
+
+void test() {
+  printf("size ActiveCells: %ld\n", activeCells.count);
 }
 
 
@@ -59,7 +75,7 @@ int addSand(Point p) {
 
   int i;
   SDL_Surface* surface = SDL_GetWindowSurface(window);
-  for (i = 0; i < 30; i++) {
+  for (i = 0; i < numDirections; i++) {
     double w = p.x + directions[i].x;
     double h = p.y + directions[i].y;
     
@@ -77,7 +93,7 @@ int addSand(Point p) {
             colors[1], 
             colors[2]);
 
-        Cell newCell = (Cell) {color, (Point) {w, h}};
+        Cell newCell = (Cell) {color, (Point) {w, h}, (Point) {-1, -1}};
         listPrependOrder(&activeCells, newCell);
         tempOcc[(int)w][(int)h] = true;
 
@@ -152,6 +168,10 @@ void calculatePhysics() {
         else if (!occupied[(int)w][(int)h] && !tempOcc[(int)w][(int)h]) {
             canMove = true;
             tempOcc[(int)cx][(int)cy] = false;
+
+            current->data.oldLocation.x = cx;
+            current->data.oldLocation.y = cy;
+
             tempOcc[(int)w][(int)h] = true;
             current->data.location.x = w;
             current->data.location.y = h;
@@ -164,8 +184,8 @@ void calculatePhysics() {
         }
       }
       if (canMove == false) {
-        listAppend(&cells, current->data);
         listRemove(&activeCells, current);
+        tempOcc[(int)cx][(int)cy] = false;
         occupied[(int)cx][(int)cy] = true;
       }
       current = next;
@@ -173,26 +193,25 @@ void calculatePhysics() {
   }
 }
 
-void drawInactiveSand() {
-  Node* current = {0};
-  SDL_Surface* surface = SDL_GetWindowSurface(window);
-
-  for (current = cells.start; current != NULL; current = current->next) {
-    SDL_Rect rect = (SDL_Rect) {
-        current->data.location.x, 
-        current->data.location.y,
-        1, 1
-    };
-    SDL_FillSurfaceRect(surface, &rect, current->data.Color);
-  }
-}
 
 void drawSand() {
-  Node* current = {0};
+  Node* current = NULL;
   SDL_Surface* surface = SDL_GetWindowSurface(window);
-  
+  if (activeCells.start == NULL) {
+    return;
+  }
   for (current = activeCells.start; current != NULL; current = current->next) {
-    SDL_Rect rect = (SDL_Rect) {
+    SDL_Rect rect = {0};
+    if (current->data.oldLocation.x > -1) {
+      rect = (SDL_Rect) {
+          current->data.oldLocation.x,
+          current->data.oldLocation.y,
+          1, 1
+      };
+      SDL_FillSurfaceRect(surface, &rect, 0x0);
+    }
+   
+    rect = (SDL_Rect) {
         current->data.location.x,
         current->data.location.y,
         1, 1
