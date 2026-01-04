@@ -133,6 +133,7 @@ int addSand(Point p) {
        }
     }
   }
+  SDL_DestroySurface(surface);
   return EXIT_SUCCESS;
 }
 
@@ -218,4 +219,5 @@ void drawSand() {
     };
     SDL_FillSurfaceRect(surface, &rect, current->data.Color);
   }
+  SDL_DestroySurface(surface);
 }
