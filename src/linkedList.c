@@ -5,11 +5,39 @@
 
 // very shit list :D
 
-Node *nodePool = {0};
-bool *nodeUsed = {0};
+bool isOff = false;
+
+/** Can optimize with commented code below **/
+Node *nodePool = NULL;
+bool *nodeUsed = NULL;
+
+/**
+Node freeStart = {0};
+Node freeEnd = {0};
+**/
 
 //If called more than one time
 bool initPool = false;
+
+
+/** Potential other solution
+void initNodePool() {
+  nodePool = (Node*) malloc(sizeof(Node) * MAXPARTICLES);
+  if (nodePool == NULL) {
+    printf("Failed to malloc; too large\n");
+    exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < MAXPARTICLES; i++) {
+    nodePool[i].next = &nodePool[i+1];
+  }
+}
+
+
+void allocFreeNode() {
+  
+}
+**/
 
 /**
 Initalizes a given list
@@ -35,6 +63,15 @@ void listInit(List* l) {
 }
 
 
+void setOff() {
+  isOff = true;
+}
+
+
+/**
+Clears the given list [l] and nodePool.
+@Param l: List to clear
+**/
 void listClear(List *l) {
   memset(nodePool, 0, sizeof(Node) * MAXPARTICLES);
   memset(nodeUsed, 0, sizeof(bool) * MAXPARTICLES);
@@ -53,6 +90,9 @@ void freeList(List *l) {
     free(nodePool);
     free(nodeUsed);
   }
+  l->start = NULL;
+  l->end = NULL;
+  l->count=0;
 }
 
 /**
@@ -60,11 +100,13 @@ Used to grab some free node from the nodePool
 @Return: Returns address of node from nodePool to use
 **/
 Node* allocNode(List *l) {
+  if (isOff) {
+    return NULL;
+  }
   size_t i = l->count;
-  while (true) {
-    if (i == MAXPARTICLES) {
-      i = 0;
-    }
+  size_t checks = 0;
+  while (checks < MAXPARTICLES) {
+    i = i % MAXPARTICLES;
     
     if (!nodeUsed[i]) {
       nodeUsed[i] = true;
@@ -74,6 +116,7 @@ Node* allocNode(List *l) {
       return &nodePool[i];
     }
     i++;
+    checks+=1;
   }
   return NULL;
 }
@@ -84,6 +127,9 @@ Frees node n, frees up item in nodePool
 @Param n: node to remove
 **/
 void freeNode(Node* n) {
+  if (isOff) {
+    return;
+  }
   int index = n - nodePool;
   nodeUsed[index] = false;
   memset(n, 0, sizeof(Node));
@@ -98,13 +144,21 @@ Appends item d to list l
 @Param d: item to add to list
 **/
 void listAppend(List* l, Cell d) {
+  if (isOff) {
+    return;
+  }
+
   Node* node = allocNode(l);
   if (node == NULL) {
     printf("Failed: Malloc[append]\n");
     exit(EXIT_FAILURE);
   }
  
-  memset(node, 0, sizeof(Node));
+  if (l->count >= MAXPARTICLES) {
+    node = NULL;
+    return;
+  }
+
   node->next = NULL;
   node->previous = NULL;
   node->data = d;
@@ -115,27 +169,32 @@ void listAppend(List* l, Cell d) {
     l->count = 1;
   }
   else {
-    l->start->previous = node;
-    node->next = l->start;
-    l->start = node;
+    l->end->next = node;
+    node->previous = l->end;
+    l->end = node;
     l->count++;
   }
 }
+
 
 /**
 Adds item from from of list to back
 Adds them in order of largest y -> smallest (also from largest x -> smallest)
 @Param l: list to add to
 @Param d: Cell to add to list
-**/
 void listPrependOrder(List* l, Cell d) {
+  if (isOff) {
+    return;
+  }
   Node* node = allocNode(l);
   if (node == NULL) {
     printf("Failed: Malloc[append]\n");
     exit(EXIT_FAILURE);
   }
-
-  memset(node, 0, sizeof(Node));
+  if (l->count >= MAXPARTICLES) {
+    node = NULL;
+    return;
+  }
   node->data = d;
   node->next = NULL;
   node->previous = NULL;
@@ -173,7 +232,7 @@ void listPrependOrder(List* l, Cell d) {
   l->end = node;
   l->count++;
 }
-
+**/
 
 /**
 Removes item n from list l
@@ -181,22 +240,34 @@ Removes item n from list l
 @Param n: node to remove from list
 **/
 void listRemove(List *l, Node* n) {
+  if (isOff) {
+    return;
+  }
   for (Node* current = l->start; current != NULL; current = current->next) {
     if (current == n) {
       if (l->start == l->end && l->start == n) {
-        l->start = l->end = NULL;
+        l->start = NULL;
+        l->end = NULL;
       }
       else if (n == l->start) {
         l->start = n->next;
-        if (l->start) l->start->previous = NULL;
+        if (l->start) {
+          l->start->previous = NULL;
+        }
       }
       else if (n == l->end) {
         l->end = n->previous;
-        if (l->end) l->end->next = NULL;
+        if (l->end) {
+          l->end->next = NULL;
+        }
       }
       else {
-        if (n->previous) n->previous->next = n->next;
-        if (n->next) n->next->previous = n->previous;
+        if (n->previous) {
+          n->previous->next = n->next;
+        }
+        if (n->next) {
+          n->next->previous = n->previous;
+        }
       }
 
       freeNode(n);  // return to pool
@@ -213,6 +284,9 @@ Returns node that contains item c
 @Return: Node that contains item c
 **/
 Node* listGet(List* l, Cell c) {
+  if (isOff) {
+    return NULL;
+  }
   for (Node* current = l->start; current != NULL; current = current->next) {
     if (isStructEqual(current->data, c)) {
       return current;

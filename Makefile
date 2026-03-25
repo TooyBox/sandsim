@@ -24,23 +24,34 @@ OBJECTS=$(OBJ)/controller.o \
 
 SRC=src
 
+OPTIM=-O1
+
 LIB=-L./lib
 INC=-I./include
 
 EXEC=sillyPaint
 
-.PHONY: all clean
+.PHONY: all clean O1 O2 O3
 
 all: $(EXEC)
 
 clean:
 	rm -rf $(EXEC) $(BUILD)
 
+O1:
+	$(OPTIM)=-O1
+
+O2:
+	$(OPTIM)=-O2
+
+O3:
+	$(OPTIM)=-O3
+
 $(BUILD) $(OBJ):
 	mkdir -p $@
 
 $(OBJ)/%.o : $(SRC)/%.c | $(OBJ)
-	$(CC) $(CFLAGS) -c $< -o $@ $(INC)
+	$(CC) $(OPTIM) $(CFLAGS) -c $< -o $@ $(INC)
 
 sillyPaint : $(OBJECTS) | $(OBJ)
 	$(CC) $(CPPFLAGS) $(OBJECTS) $(LIB) $(LDFLAGS) -lSDL3 -o sillyPaint

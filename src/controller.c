@@ -5,6 +5,7 @@
 
 enum state {def, drawing, random};
 enum state currentState = def;
+#include <SDL3/SDL.h>
 
 /**
 Used to handle multiple mouse events easily + with proper drawing
@@ -52,6 +53,7 @@ int start(SDL_Window* window) {
       switch(event.type) {
         case SDL_EVENT_QUIT:
           running = false;
+          setOff();
           freeAllCells();
           break;
 
@@ -86,5 +88,6 @@ int start(SDL_Window* window) {
     drawSand();
     SDL_UpdateWindowSurface(window);
   }
-  return EXIT_SUCCESS;
+  
+    return EXIT_SUCCESS;
 }

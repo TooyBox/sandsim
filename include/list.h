@@ -19,6 +19,8 @@ typedef struct List {
 
 void listInit();
 
+void setOff();
+
 void freeList(List*);
 
 void listClear(List*);
